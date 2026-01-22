@@ -1,6 +1,5 @@
-# TP – Audit de sécurité d’un serveur VPN 
-# avec l'outil dependency-check d'OWASP
-BTS SIO – Option SISR – Bloc 3 Cybersécurité
+# Audit de sécurité d’un serveur VPN avec dependency-check d'OWASP
+BTS SIO 1 – Option SISR – Bloc 3 Cybersécurité
 
 ## Contexte professionnel
 
