@@ -24,10 +24,10 @@ Il **configure**, **met à jour**, **sécurise** et **intègre** l’équipement
 
 ### Exemples courants d’appliances réseau
 
-- **Pare-feu / UTM** : :contentReference[oaicite:0]{index=0}, :contentReference[oaicite:1]{index=1}  
-- **VPN** : :contentReference[oaicite:2]{index=2}  
-- **Proxy / filtrage web** : :contentReference[oaicite:3]{index=3}  
-- **IDS / IPS** : :contentReference[oaicite:4]{index=4}  
+- **Pare-feu / UTM** : Fortinet, Palo Alto Networks  
+- **VPN** : OpenVPN  
+- **Proxy / filtrage web** : Squid  
+- **IDS / IPS** : Suricata  
 
 ### Formes de déploiement possibles
 
