@@ -8,23 +8,39 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      # 1️⃣ Récupération du dépôt
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      # 2️⃣ Télécharger l'image du serveur VPN (appliance réseau)
       - name: Pull VPN image
         run: |
           docker pull openvpn/openvpn-as:latest
 
-      - name: Create container (without starting it)
+      # 3️⃣ Créer le conteneur SANS le démarrer
+      # (évite les problèmes de privilèges /dev/net/tun)
+      - name: Create container (no start)
         run: |
           docker create --name vpn-audit openvpn/openvpn-as:latest
 
-      - name: Export container filesystem
+      # 4️⃣ Exporter le système de fichiers du conteneur
+      # en excluant les pseudo-filesystems (dev, proc, sys, run)
+      - name: Export container filesystem (rootfs)
         run: |
           mkdir -p rootfs
           docker export vpn-audit -o vpn-audit.tar
-          tar -xf vpn-audit.tar -C rootfs
 
+          tar -xf vpn-audit.tar -C rootfs \
+            --exclude='dev/*' \
+            --exclude='*/dev/*' \
+            --exclude='proc/*' \
+            --exclude='*/proc/*' \
+            --exclude='sys/*' \
+            --exclude='*/sys/*' \
+            --exclude='run/*' \
+            --exclude='*/run/*'
+
+      # 5️⃣ Audit de sécurité avec OWASP Dependency-Check
       - name: Run Dependency-Check
         uses: dependency-check/Dependency-Check_Action@main
         with:
@@ -33,6 +49,7 @@ jobs:
           format: "HTML"
           out: "reports"
 
+      # 6️⃣ Publication du rapport HTML comme artifact
       - name: Upload report artifact
         uses: actions/upload-artifact@v4
         with:
