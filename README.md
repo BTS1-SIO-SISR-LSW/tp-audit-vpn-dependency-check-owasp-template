@@ -1,5 +1,6 @@
 # TP – Audit de sécurité d’un composant logiciel fournisseur  
-BTS SIO – Option SISR – Bloc 3 : Cybersécurité des services informatiques
+BTS SIO – Option SISR  
+Bloc 3 – Cybersécurité des services informatiques
 
 ---
 
@@ -8,9 +9,9 @@ BTS SIO – Option SISR – Bloc 3 : Cybersécurité des services informatiques
 Vous êtes **administrateur systèmes et réseaux** dans une organisation.  
 Un fournisseur vous livre une **appliance réseau** (pare-feu, VPN, proxy, etc.) intégrant une **console d’administration logicielle**.
 
-Avant toute mise en production sur le système d’information, il est nécessaire de réaliser un **audit de sécurité des composants logiciels fournis**, afin d’identifier d’éventuelles vulnérabilités connues dans les bibliothèques utilisées par cette appliance.
+Avant toute mise en production de cet équipement sur le système d’information, il est nécessaire de réaliser un **audit de sécurité des composants logiciels fournis**, afin d’identifier d’éventuelles vulnérabilités connues dans les bibliothèques utilisées.
 
-L’audit est automatisé via une chaîne d’intégration continue (CI) utilisant **GitHub Actions** et l’outil **OWASP Dependency-Check**.
+L’audit est automatisé à l’aide d’une chaîne d’intégration continue (CI) reposant sur **GitHub Actions** et l’outil **OWASP Dependency-Check**.
 
 ---
 
@@ -18,8 +19,8 @@ L’audit est automatisé via une chaîne d’intégration continue (CI) utilisa
 
 Une **appliance réseau** est un **équipement matériel ou virtuel prêt à l’emploi**, dédié à une **fonction réseau ou de sécurité précise**, livré par un constructeur et **administré comme un tout** (matériel + système + logiciel).
 
-L’administrateur ne développe pas le code de l’appliance :  
-il **configure**, **met à jour**, **sécurise** et **intègre** l’équipement dans le système d’information.
+L’administrateur ne développe pas le code de l’appliance.  
+Il **configure**, **met à jour**, **sécurise** et **intègre** l’équipement dans le système d’information.
 
 ### Exemples courants d’appliances réseau
 
@@ -41,19 +42,19 @@ Ces solutions existent souvent :
 
 - Identifier des vulnérabilités connues (CVE) dans un composant logiciel fourni par un tiers.
 - Comprendre les impacts de ces vulnérabilités sur un **service réseau potentiellement exposé**.
-- Adopter une posture d’**administrateur SISR** : analyse de risque et décision de mise en production ou de blocage.
+- Adopter une posture d’**administrateur SISR** : analyse de risque et prise de décision de mise en production.
 
 ---
 
 ## Travail à réaliser
 
 1. Ouvrir le dépôt GitHub fourni via GitHub Classroom.
-2. Aller dans l’onglet **Actions**.
+2. Accéder à l’onglet **Actions**.
 3. Lancer manuellement le workflow **Audit – Dependency-Check**.
-4. Attendre la fin de l’exécution du workflow.
+4. Attendre la fin complète de l’exécution du workflow.
 5. Télécharger l’artifact contenant le rapport d’audit.
 6. Ouvrir le fichier `dependency-check-report.html`.
-7. Répondre aux questions ci-dessous en vous appuyant sur le rapport.
+7. Répondre aux questions ci-dessous en vous appuyant exclusivement sur le rapport.
 
 ---
 
@@ -76,14 +77,14 @@ Justifiez votre réponse.
 
 **Question 3**  
 Quelles technologies ou écosystèmes logiciels sont utilisés par ce composant ?  
-Citez les indices présents dans le rapport.
+Appuyez votre réponse sur des éléments visibles dans le rapport.
 
 ---
 
 ### Partie 2 – Analyse des vulnérabilités (CVE)
 
 **Question 4**  
-Combien de dépendances ont été analysées (*Dependencies Scanned*) ?  
+Combien de dépendances ont été analysées (champ *Dependencies Scanned*) ?  
 Combien de dépendances vulnérables ont été identifiées ?
 
 **Question 5**  
@@ -94,7 +95,7 @@ Quelle est la vulnérabilité la plus critique détectée ?
 
 **Question 6**  
 Quel type de composant est concerné par cette vulnérabilité (journalisation, réseau, parsing, etc.) ?  
-Expliquez pourquoi ce type de composant est critique dans une appliance réseau.
+Expliquez pourquoi ce type de composant est sensible dans une appliance réseau.
 
 ---
 
@@ -117,7 +118,7 @@ Quels impacts ces vulnérabilités pourraient-elles avoir sur le système d’in
 - fuite d’informations.
 
 **Question 9**  
-Pourquoi une vulnérabilité logicielle dans un composant fournisseur engage-t-elle la responsabilité de l’administrateur SISR, même sans modification du code source ?
+Expliquez pourquoi une vulnérabilité logicielle dans un composant fournisseur engage la responsabilité de l’administrateur SISR, même sans modification du code source.
 
 ---
 
@@ -137,8 +138,8 @@ Quelles actions pouvez-vous mener sans modifier le code source ?
 - mise à jour de l’appliance,
 - restriction des accès,
 - filtrage réseau,
-- supervision renforcée,
-- durcissement de configuration.
+- durcissement de configuration,
+- supervision renforcée.
 
 **Question 12**  
 Quels contrôles supplémentaires recommanderiez-vous avant validation finale ?
