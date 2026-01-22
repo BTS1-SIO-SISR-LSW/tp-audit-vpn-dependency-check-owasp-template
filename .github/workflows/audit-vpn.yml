@@ -11,14 +11,35 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      # 1) Installer Java (pour Maven)
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+          cache: maven
+
+      # 2) Télécharger / matérialiser les dépendances Maven (JAR) dans target/dependency
+      - name: Resolve and copy Maven dependencies
+        working-directory: vendor-console
+        run: |
+          mvn -q -DskipTests dependency:copy-dependencies
+
+      # (Optionnel) Vérifier que des JAR existent bien
+      - name: Check copied dependencies (optional)
+        run: |
+          ls -la vendor-console/target/dependency | head -n 50
+
+      # 3) Scanner les JAR matérialisés (cible “naturelle” de Dependency-Check)
       - name: Run OWASP Dependency-Check
         uses: dependency-check/Dependency-Check_Action@main
         with:
           project: "Audit-VPN-Fournisseur"
-          path: "vendor-console"
+          path: "vendor-console/target/dependency"
           format: "HTML"
           out: "reports"
 
+      # 4) Publier le rapport
       - name: Upload report artifact
         uses: actions/upload-artifact@v4
         with:
