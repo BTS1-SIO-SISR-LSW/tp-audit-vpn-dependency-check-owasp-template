@@ -19,26 +19,23 @@ jobs:
         run: |
           docker create --name vpn-audit openvpn/openvpn-as:latest
 
-      # ✅ FIX ROBUSTE : on exporte, on liste, on filtre, puis on extrait UNIQUEMENT les chemins utiles
-      - name: Export container filesystem (filtered extraction)
+      # ✅ FIX: plus de docker export + tar
+      # On copie uniquement les dossiers utiles au scan depuis le conteneur.
+      - name: Collect filesystem paths (docker cp)
         run: |
           set -euo pipefail
 
-          mkdir -p rootfs
-          docker export vpn-audit -o vpn-audit.tar
+          mkdir -p rootfs/usr rootfs/lib
 
-          # 1) Liste le contenu de l'archive
-          tar -tf vpn-audit.tar > all_files.txt
+          # Copie des bibliothèques et binaires utiles (SISR)
+          docker cp vpn-audit:/usr/lib rootfs/usr/lib || true
+          docker cp vpn-audit:/lib rootfs/lib || true
+          docker cp vpn-audit:/usr/sbin rootfs/usr/sbin || true
+          docker cp vpn-audit:/usr/bin rootfs/usr/bin || true
 
-          # 2) Garde uniquement les chemins utiles au scan (libs + binaires)
-          #    (et on évite totalement run/, dev/, proc/, sys/)
-          grep -E '^(lib/|usr/lib/|usr/sbin/|usr/bin/)' all_files.txt > files_to_extract.txt || true
-
-          echo "Nombre de fichiers à extraire:"
-          wc -l files_to_extract.txt || true
-
-          # 3) Extrait uniquement ces fichiers
-          tar -xf vpn-audit.tar -C rootfs --files-from=files_to_extract.txt
+          echo "Contenu extrait (aperçu):"
+          ls -la rootfs/usr  || true
+          ls -la rootfs/lib  || true
 
       - name: Run Dependency-Check
         uses: dependency-check/Dependency-Check_Action@main
@@ -54,7 +51,7 @@ jobs:
           name: rapport-audit-vpn
           path: reports
 
-      - name: Cleanup (optional)
+      - name: Cleanup
         if: always()
         run: |
           docker rm -f vpn-audit 2>/dev/null || true
