@@ -8,48 +8,38 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # 1) Récupération du dépôt (utile si tu ajoutes README, consignes, etc.)
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # 2) Télécharger l'image du "VPN appliance"
       - name: Pull VPN image
         run: |
           docker pull openvpn/openvpn-as:latest
 
-      # 3) Créer un conteneur SANS le démarrer (pas de /dev/net/tun, pas de privilèges)
       - name: Create container (no start)
         run: |
           docker create --name vpn-audit openvpn/openvpn-as:latest
 
-      # 4) Exporter et extraire UNIQUEMENT les chemins utiles au scan
-      #    (évite les erreurs tar/mknod sur /dev, /run, etc.)
-      - name: Export container filesystem (only relevant paths)
+      # ✅ FIX ROBUSTE : on exporte, on liste, on filtre, puis on extrait UNIQUEMENT les chemins utiles
+      - name: Export container filesystem (filtered extraction)
         run: |
+          set -euo pipefail
+
           mkdir -p rootfs
           docker export vpn-audit -o vpn-audit.tar
 
-          # Extraction ciblée : seulement libs et binaires d'intérêt
-          tar -xf vpn-audit.tar -C rootfs \
-            --wildcards \
-            'lib/*' \
-            'usr/lib/*' \
-            'usr/sbin/*' \
-            'usr/bin/*'
+          # 1) Liste le contenu de l'archive
+          tar -tf vpn-audit.tar > all_files.txt
 
-      # (Optionnel) Vérification rapide
-      - name: Check extracted paths (optional)
-        run: |
-          echo "rootfs size:"
-          du -sh rootfs || true
-          echo "usr/sbin samples:"
-          ls -la rootfs/usr/sbin 2>/dev/null | head -n 50 || true
-          echo "usr/lib samples:"
-          ls -la rootfs/usr/lib 2>/dev/null | head -n 50 || true
-          echo "lib samples:"
-          ls -la rootfs/lib 2>/dev/null | head -n 50 || true
+          # 2) Garde uniquement les chemins utiles au scan (libs + binaires)
+          #    (et on évite totalement run/, dev/, proc/, sys/)
+          grep -E '^(lib/|usr/lib/|usr/sbin/|usr/bin/)' all_files.txt > files_to_extract.txt || true
 
-      # 5) Lancer OWASP Dependency-Check sur le rootfs extrait
+          echo "Nombre de fichiers à extraire:"
+          wc -l files_to_extract.txt || true
+
+          # 3) Extrait uniquement ces fichiers
+          tar -xf vpn-audit.tar -C rootfs --files-from=files_to_extract.txt
+
       - name: Run Dependency-Check
         uses: dependency-check/Dependency-Check_Action@main
         with:
@@ -58,15 +48,13 @@ jobs:
           format: "HTML"
           out: "reports"
 
-      # 6) Publier le rapport HTML en artifact
       - name: Upload report artifact
         uses: actions/upload-artifact@v4
         with:
           name: rapport-audit-vpn
           path: reports
 
-      # 7) Nettoyage (optionnel, mais propre)
-      - name: Cleanup container (optional)
+      - name: Cleanup (optional)
         if: always()
         run: |
           docker rm -f vpn-audit 2>/dev/null || true
