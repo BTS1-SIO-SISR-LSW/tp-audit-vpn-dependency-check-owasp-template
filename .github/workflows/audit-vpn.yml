@@ -11,7 +11,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # 1) Java pour Maven (sur le runner)
+      # Java + Maven pour matérialiser les dépendances (JAR)
       - name: Set up Java
         uses: actions/setup-java@v4
         with:
@@ -19,32 +19,49 @@ jobs:
           java-version: "17"
           cache: maven
 
-      # 2) Matérialiser les dépendances (JAR) à scanner
       - name: Resolve and copy Maven dependencies
         working-directory: vendor-console
         run: |
           mvn -q -DskipTests dependency:copy-dependencies
 
-      # 3) Vérification (facultatif mais utile)
-      - name: Check copied dependencies
+      - name: Check copied dependencies (optional)
         run: |
-          echo "JAR présents dans vendor-console/target/dependency :"
           ls -la vendor-console/target/dependency | head -n 50
 
-      # 4) Lancer OWASP Dependency-Check via l'image Docker officielle
+      # Cache de la base Dependency-Check (évite de retélécharger la NVD à chaque run)
+      - name: Cache Dependency-Check data
+        uses: actions/cache@v4
+        with:
+          path: odc-data
+          key: odc-data-${{ runner.os }}-v1
+
+      # Exécution Dependency-Check via l'image Docker officielle,
+      # en montant un répertoire writable pour la DB
       - name: Run OWASP Dependency-Check (Docker)
+        env:
+          NVD_API_KEY: ${{ secrets.NVD_API_KEY }}
         run: |
-          mkdir -p reports
+          set -euo pipefail
+          mkdir -p reports odc-data
+
+          # Si tu n'as PAS encore de clé, tu peux laisser vide,
+          # mais ce sera plus lent et peut retaper du 429.
+          if [ -z "${NVD_API_KEY:-}" ]; then
+            echo "WARNING: NVD_API_KEY is not set. Risk of 429 rate limiting."
+          fi
 
           docker run --rm \
+            -u 0:0 \
             -v "${{ github.workspace }}:/src" \
+            -v "${{ github.workspace }}/odc-data:/usr/share/dependency-check/data" \
             owasp/dependency-check:latest \
             --project "Audit-VPN-Fournisseur" \
             --scan /src/vendor-console/target/dependency \
             --format "HTML" \
-            --out /src/reports
+            --out /src/reports \
+            --nvdApiKey "${NVD_API_KEY:-}" \
+            --nvdApiDelay 2000
 
-      # 5) Publier le rapport
       - name: Upload report artifact
         uses: actions/upload-artifact@v4
         with:
