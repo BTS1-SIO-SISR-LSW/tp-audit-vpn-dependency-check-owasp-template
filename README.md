@@ -127,15 +127,15 @@ En cinq à dix lignes maximum, rédigez une conclusion destinée à un responsab
 
 ## Rendu attendu
 
-- Un fichier `SYNTHESE.md` (ou un document PDF) contenant les réponses aux questions.
-- Le rapport `dependency-check-report.html` ou le dossier `reports`.
+- Un document PDF contenant les réponses aux questions .
+- Le rapport `dependency-check-report.html` ou le dossier `reports` zippé .
 
 ---
 
 ## Rappel
 
 Vous n’êtes pas développeur.  
-Vous auditez un service réseau et prenez une décision de sécurité.
+Vous auditez un service réseau et prenez une décision de sécurité .
 
 ---
 
