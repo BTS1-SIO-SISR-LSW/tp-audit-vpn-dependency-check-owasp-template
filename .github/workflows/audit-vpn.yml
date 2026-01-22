@@ -1,0 +1,40 @@
+name: Audit VPN (Dependency-Check)
+
+on:
+  workflow_dispatch:
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Pull VPN image
+        run: |
+          docker pull openvpn/openvpn-as:latest
+
+      - name: Create container (without starting it)
+        run: |
+          docker create --name vpn-audit openvpn/openvpn-as:latest
+
+      - name: Export container filesystem
+        run: |
+          mkdir -p rootfs
+          docker export vpn-audit -o vpn-audit.tar
+          tar -xf vpn-audit.tar -C rootfs
+
+      - name: Run Dependency-Check
+        uses: dependency-check/Dependency-Check_Action@main
+        with:
+          project: "Audit-VPN-Entreprise"
+          path: "rootfs"
+          format: "HTML"
+          out: "reports"
+
+      - name: Upload report artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: rapport-audit-vpn
+          path: reports
