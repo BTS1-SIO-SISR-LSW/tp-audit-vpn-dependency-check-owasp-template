@@ -8,15 +8,38 @@ Un fournisseur vous livre une **appliance réseau** (pare-feu, VPN, proxy, etc.)
 
 Avant la mise en production de cet équipement sur le système d’information, vous devez réaliser un **audit de sécurité des composants logiciels fournis**, afin d’identifier d’éventuelles vulnérabilités connues dans les bibliothèques utilisées.
 
-L’audit est réalisé automatiquement via une chaîne d’intégration continue (**:contentReference[oaicite:0]{index=0}**) et l’outil **:contentReference[oaicite:1]{index=1}**.
+L’audit est réalisé automatiquement via une chaîne d’intégration continue (GitHub Actions) et l’outil OWASP Dependency-Check.
+
+---
+
+## Qu’est-ce qu’une appliance réseau ?
+
+Une **appliance réseau** est un **équipement matériel ou virtuel prêt à l’emploi**, dédié à une **fonction réseau ou de sécurité précise**, livré par un constructeur et **administré comme un tout** (matériel + système + logiciel).
+
+L’administrateur ne développe pas le code de l’appliance :  
+il **configure**, **met à jour**, **sécurise** et **intègre** l’équipement dans le système d’information.
+
+### Exemples courants d’appliances réseau
+
+- **Pare-feu / UTM** : :contentReference[oaicite:0]{index=0}, :contentReference[oaicite:1]{index=1}  
+- **VPN** : :contentReference[oaicite:2]{index=2}  
+- **Proxy / filtrage web** : :contentReference[oaicite:3]{index=3}  
+- **IDS / IPS** : :contentReference[oaicite:4]{index=4}  
+
+### Formes de déploiement possibles
+
+Ces solutions existent souvent :
+- en **boîtier physique**,
+- en **machine virtuelle**,
+- en **conteneur**.
 
 ---
 
 ## Objectifs du TP
 
 - Identifier des vulnérabilités connues (CVE) dans un composant logiciel fourni par un tiers.
-- Comprendre les impacts de ces vulnérabilités sur un **service réseau exposé**.
-- Adopter une posture d’**administrateur SISR** : analyse de risque, décision de mise en production ou de blocage.
+- Comprendre les impacts de ces vulnérabilités sur un **service réseau potentiellement exposé**.
+- Adopter une posture d’**administrateur SISR** : analyse de risque et décision de mise en production ou de blocage.
 
 ---
 
@@ -36,7 +59,7 @@ L’audit est réalisé automatiquement via une chaîne d’intégration continu
 
 **Question 1**  
 Quel est le nom du projet audité tel qu’indiqué dans le rapport ?  
-Expliquez ce que représente ce projet dans le cadre d’un équipement réseau fourni par un constructeur.
+Expliquez ce que représente ce projet dans le cadre d’une appliance réseau fournie par un constructeur.
 
 **Question 2**  
 Quel est le type de composant analysé ?
@@ -48,7 +71,7 @@ Quel est le type de composant analysé ?
 Justifiez votre réponse.
 
 **Question 3**  
-Quelles technologies ou écosystèmes logiciels sont utilisés par ce composant (ex. Java, bibliothèques tierces, etc.) ?  
+Quelles technologies ou écosystèmes logiciels sont utilisés par ce composant ?  
 Citez les indices présents dans le rapport.
 
 ---
@@ -56,22 +79,17 @@ Citez les indices présents dans le rapport.
 ### Partie 2 – Analyse des vulnérabilités (CVE)
 
 **Question 4**  
-Combien de dépendances ont été analysées (champ *Dependencies Scanned*) ?  
+Combien de dépendances ont été analysées (*Dependencies Scanned*) ?  
 Combien de dépendances vulnérables ont été identifiées ?
 
 **Question 5**  
 Quelle est la vulnérabilité la plus critique détectée ?
 - Identifiant CVE  
 - Score CVSS  
-- Niveau de gravité (faible, moyen, élevé, critique)
+- Niveau de gravité
 
 **Question 6**  
-Cette vulnérabilité concerne-t-elle :
-- une bibliothèque de journalisation
-- une bibliothèque réseau
-- un composant de parsing ou de sérialisation
-- un autre type de composant
-
+Quel type de composant est concerné par cette vulnérabilité (journalisation, réseau, parsing, etc.) ?  
 Expliquez pourquoi ce type de composant est critique dans une appliance réseau.
 
 ---
@@ -79,69 +97,62 @@ Expliquez pourquoi ce type de composant est critique dans une appliance réseau.
 ### Partie 3 – Impact sur le système d’information
 
 **Question 7**  
-La console d’administration est-elle susceptible d’être :
-- exposée à Internet
-- accessible depuis le réseau interne
-- accessible uniquement par des administrateurs
+La console d’administration est-elle susceptible d’être exposée :
+- à Internet,
+- au réseau interne,
+- uniquement à des administrateurs ?
 
-Expliquez les risques associés à cette exposition.
+Expliquez les risques associés.
 
 **Question 8**  
 Quels impacts ces vulnérabilités pourraient-elles avoir sur le système d’information ?
-- accès non autorisé à l’équipement
-- compromission du réseau interne
-- élévation de privilèges
-- déni de service
-- fuite d’informations sensibles
-
-Justifiez votre réponse.
+- accès non autorisé,
+- compromission du réseau,
+- élévation de privilèges,
+- déni de service,
+- fuite d’informations.
 
 **Question 9**  
-Pourquoi une vulnérabilité logicielle dans un composant fournisseur est-elle critique même si l’administrateur n’a pas écrit le code ?
+Pourquoi une vulnérabilité logicielle dans un composant fournisseur engage-t-elle la responsabilité de l’administrateur SISR ?
 
 ---
 
 ### Partie 4 – Décision en tant qu’administrateur SISR
 
 **Question 10**  
-En tant qu’administrateur systèmes et réseaux, quelle décision recommandez-vous ?
-- mise en production immédiate
-- mise en production conditionnelle (après correctif)
-- refus de mise en production
-- demande de correctif au fournisseur
+Quelle décision recommandez-vous ?
+- mise en production,
+- mise en production conditionnelle,
+- refus de mise en production,
+- demande de correctif au fournisseur.
 
-Argumentez votre choix.
+Argumentez.
 
 **Question 11**  
 Quelles actions pouvez-vous mener sans modifier le code source ?
-- mise à jour de la version du composant
-- configuration restrictive
-- filtrage réseau / pare-feu
-- limitation d’accès à la console
-- surveillance renforcée
+- mise à jour,
+- restriction d’accès,
+- filtrage réseau,
+- supervision renforcée.
 
 **Question 12**  
 Quels contrôles supplémentaires recommanderiez-vous avant validation finale ?
-- tests d’intrusion
-- audit de configuration
-- journalisation et supervision
-- revue de conformité sécurité
 
 ---
 
 ### Partie 5 – Synthèse professionnelle
 
 **Question 13**  
-En 5 à 10 lignes maximum, rédigez une synthèse destinée à un RSSI ou à un responsable informatique :
-- état de sécurité du composant audité
-- niveau de risque pour le système d’information
-- décision recommandée et justification
+En 5 à 10 lignes, rédigez une synthèse destinée à un RSSI ou à un responsable informatique :
+- état de sécurité du composant,
+- niveau de risque,
+- décision recommandée.
 
 ---
 
 ## Rendu attendu
 
-- Un fichier `SYNTHESE.md` (ou un document PDF) contenant les réponses argumentées.
+- Un fichier `SYNTHESE.md` (ou PDF) avec les réponses argumentées.
 - Le rapport `dependency-check-report.html` en annexe si demandé.
 
 ---
@@ -155,8 +166,7 @@ vous n’êtes pas développeur du composant, mais **responsable de son intégra
 
 ## Compétences évaluées (SISR)
 
-- Identifier des vulnérabilités logicielles dans un contexte d’infrastructure.
-- Analyser l’exposition et les impacts sur un service réseau.
 - Exploiter un rapport d’audit de sécurité.
-- Prendre une décision de mise en production ou de blocage.
-- S’inscrire dans une démarche de gestion des risques cyber.
+- Analyser l’exposition et les impacts sur une infrastructure réseau.
+- Prendre une décision argumentée de mise en production.
+- Mettre en œuvre une démarche de gestion des risques cyber.
