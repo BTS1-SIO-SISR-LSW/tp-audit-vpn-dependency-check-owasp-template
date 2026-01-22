@@ -1,4 +1,4 @@
-name: Audit VPN (Dependency-Check)
+name: Audit VPN – Composant fournisseur (Dependency-Check)
 
 on:
   workflow_dispatch:
@@ -11,37 +11,11 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Pull VPN image
-        run: |
-          docker pull openvpn/openvpn-as:latest
-
-      - name: Create container (no start)
-        run: |
-          docker create --name vpn-audit openvpn/openvpn-as:latest
-
-      # ✅ FIX: plus de docker export + tar
-      # On copie uniquement les dossiers utiles au scan depuis le conteneur.
-      - name: Collect filesystem paths (docker cp)
-        run: |
-          set -euo pipefail
-
-          mkdir -p rootfs/usr rootfs/lib
-
-          # Copie des bibliothèques et binaires utiles (SISR)
-          docker cp vpn-audit:/usr/lib rootfs/usr/lib || true
-          docker cp vpn-audit:/lib rootfs/lib || true
-          docker cp vpn-audit:/usr/sbin rootfs/usr/sbin || true
-          docker cp vpn-audit:/usr/bin rootfs/usr/bin || true
-
-          echo "Contenu extrait (aperçu):"
-          ls -la rootfs/usr  || true
-          ls -la rootfs/lib  || true
-
-      - name: Run Dependency-Check
+      - name: Run OWASP Dependency-Check
         uses: dependency-check/Dependency-Check_Action@main
         with:
-          project: "Audit-VPN-Entreprise"
-          path: "rootfs"
+          project: "Audit-VPN-Fournisseur"
+          path: "vendor-console"
           format: "HTML"
           out: "reports"
 
@@ -50,8 +24,3 @@ jobs:
         with:
           name: rapport-audit-vpn
           path: reports
-
-      - name: Cleanup
-        if: always()
-        run: |
-          docker rm -f vpn-audit 2>/dev/null || true
